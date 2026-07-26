@@ -606,52 +606,7 @@ function HomeScreen({
   const useDefaultLocation = useNourStore((state) => state.useDefaultLocation);
   const [locationDenied, setLocationDenied] = useState(false);
   
-  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-  const [updateUrl, setUpdateUrl] = useState<string | null>(null);
-  const [updateSeen, setUpdateSeen] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-
-  useEffect(() => {
-    const checkUpdate = async () => {
-      try {
-        const version = Constants.expoConfig?.version ?? "1.5.1";
-        const res = await fetch("https://api.github.com/repos/12362aa/nour/releases/latest");
-        if (!res.ok) return;
-        const data = await res.json();
-        const latestTag = data.tag_name as string;
-        
-        const isNewer = (current: string, latest: string) => {
-          const c = current.replace('v', '').split('.').map(Number);
-          const l = latest.replace('v', '').split('.').map(Number);
-          for (let i = 0; i < Math.max(c.length, l.length); i++) {
-            const cv = c[i] || 0;
-            const lv = l[i] || 0;
-            if (lv > cv) return true;
-            if (cv > lv) return false;
-          }
-          return false;
-        };
-
-        if (latestTag && isNewer(version, latestTag)) {
-          setUpdateMessage(`الإصدار ${latestTag} متاح الآن! يتضمن تحسينات جديدة.`);
-          const apkAsset = data.assets?.find((a: any) => a.name.endsWith('.apk'));
-          setUpdateUrl(apkAsset ? apkAsset.browser_download_url : "https://github.com/12362aa/nour/releases/latest");
-          
-          const seen = await AsyncStorage.getItem("@update_message_seen_" + latestTag);
-          if (seen) {
-            setUpdateSeen(true);
-          } else {
-            setShowUpdateModal(true);
-          }
-        }
-      } catch (err) {
-        console.warn("[nour:update] Failed to check for updates", err);
-      }
-    };
-    void checkUpdate();
-  }, []);
-
-    const [clock, setClock] = useState(() => new Date());
+  const [clock, setClock] = useState(() => new Date());
   const [khatmaConfig, setKhatmaConfig] = useState<KhatmaConfig | null>(null);
   const { resource, reload } = useResource(() => getPrayerTimes(coordinates.latitude, coordinates.longitude), [coordinates.latitude, coordinates.longitude]);
   const times = resource.data ?? fallbackPrayerTimes;
@@ -704,7 +659,7 @@ function HomeScreen({
 
   return (
       <Screen>
-      <Header title="نور" subtitle="رفيقك اليومي للذكر والقرآن" navigate={navigate} onInfoPress={updateMessage ? () => setShowUpdateModal(true) : undefined} showInfoBadge={!!updateMessage && !updateSeen} />
+      <Header title="نور" subtitle="رفيقك اليومي للذكر والقرآن" navigate={navigate}  />
       <ImageBackground source={prayerBackgrounds[next.key]} style={styles.hero} imageStyle={styles.heroImage}>
         <View style={styles.heroOverlay}>
           <View style={styles.heroTop}>
@@ -893,41 +848,7 @@ function HomeScreen({
         <Pressable onPress={testAdhan} style={styles.smallGoldButton}><Text style={styles.smallGoldButtonText}>اختبار</Text></Pressable>
       </Card>
 
-      <Modal visible={showUpdateModal} transparent animationType="fade" onRequestClose={() => setShowUpdateModal(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.errorModal, { backgroundColor: colors.surface }]}>
-            <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: colors.surfaceSoft, alignItems: "center", justifyContent: "center" }}>
-              <Sparkles color={colors.gold} size={28} />
-            </View>
-            <Text style={[styles.modalTitle, { color: colors.ink }]}>تحديث جديد متاح</Text>
-            <Text style={[styles.cardBody, { color: colors.muted, textAlign: "center", marginTop: -4 }]}>{updateMessage}</Text>
-            
-            <View style={{ width: "100%", gap: 12, marginTop: 12 }}>
-              <PrimaryButton 
-                label="تحميل التحديث" 
-                icon={Compass} 
-                onPress={() => {
-                  if (updateUrl) {
-                    void Linking.openURL(updateUrl);
-                  }
-                  setShowUpdateModal(false);
-                  const latestTag = updateMessage?.match(/الإصدار (.*?) متاح/)?.[1] || "unknown";
-                  AsyncStorage.setItem("@update_message_seen_" + latestTag, "1");
-                  setUpdateSeen(true);
-                }} 
-              />
-              <Pressable onPress={() => {
-                setShowUpdateModal(false);
-                const latestTag = updateMessage?.match(/الإصدار (.*?) متاح/)?.[1] || "unknown";
-                AsyncStorage.setItem("@update_message_seen_" + latestTag, "1");
-                setUpdateSeen(true);
-              }} style={styles.closeModal}>
-                <Text style={styles.closeModalText}>لاحقاً</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      
 
     </Screen>
   );
@@ -1868,7 +1789,7 @@ function NourAppRoot() {
     <SafeAreaProvider>
       <SafeAreaView style={[styles.app, { backgroundColor: colors.background }]} edges={["top"]}>
         <StatusBar style={isOverlay || darkMode ? "light" : "dark"} />
-        <Animated.View key={route} entering={FadeInDown.duration(220)} style={[styles.app, { backgroundColor: colors.background }]}>{content}</Animated.View>
+        <Animated.View key={route} style={[styles.app, { backgroundColor: colors.background }]}>{content}</Animated.View>
         {!isOverlay ? <BottomNav route={route} navigate={navigate} /> : null}
         {toast ? <Animated.View entering={FadeIn} style={[styles.toast, { backgroundColor: colors.primary }]}><Text style={styles.toastText}>{toast}</Text></Animated.View> : null}
         {error ? <ErrorDialog error={error.error} onRetry={() => { setError(null); void error.retry(); }} onClose={() => setError(null)} /> : null}
