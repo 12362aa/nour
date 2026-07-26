@@ -33,6 +33,7 @@ import * as Notifications from "expo-notifications";
 import { LinearGradient } from "expo-linear-gradient";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import notifee, { EventType } from "@notifee/react-native";
+import { Audio } from "expo-av";
 import Animated, { FadeInDown, FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withTiming, withRepeat, Easing } from "react-native-reanimated";
 import { ChevronDown, AlarmClock, ArrowLeft, Bell, BellOff, BookMarked, BookOpen, Check, ChevronLeft, ChevronRight, CircleHelp, CloudOff, Compass, Flame, Heart, Home, Landmark, Library, ListMusic, MoonStar, MapPin, Pause, Play, Radio, RotateCcw, Search, Settings, Gift, Share2, Sparkles, Sun, Sunrise, Sunset, Moon, UserRound, Volume2, X, Zap, ShieldCheck, Clock, ChevronUp, Info } from "lucide-react-native";
 import {
@@ -1120,7 +1121,7 @@ function VerseRow({ verse, onPlay, onTafsir, loading }: { verse: Surah["verses"]
   );
 }
 
-function AdhkarScreen({ onBack, openReminder, showError }: { onBack: () => void; openReminder: (items: DhikrItem[], index: number) => void; showError: (error: unknown, retry: () => void) => void }) {
+function AdhkarScreen({ onBack, openReminder, showError }: { onBack: () => void; openReminder: (items: DhikrItem[], index: number, categoryId: string) => void; showError: (error: unknown, retry: () => void) => void }) {
   const { resource, reload } = useResource(getAdhkar, []);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -1145,7 +1146,7 @@ function AdhkarScreen({ onBack, openReminder, showError }: { onBack: () => void;
       ) : null}
       {selected ? (
         <>
-          <View style={styles.dhikrHeading}><View><Text style={styles.dhikrTitle}>{selected.title}</Text><Text style={styles.dhikrSubtitle}>{toArabicNumber(selected.items.length)} أذكار موثقة في هذه الفئة</Text></View><Pressable accessibilityLabel="فتح وضع قراءة الأذكار" onPress={() => openReminder(selected.items, 0)} style={styles.voiceShortcut}><BookOpen color={palette.sage} size={22} /></Pressable></View>
+          <View style={styles.dhikrHeading}><View><Text style={styles.dhikrTitle}>{selected.title}</Text><Text style={styles.dhikrSubtitle}>{toArabicNumber(selected.items.length)} أذكار موثقة في هذه الفئة</Text></View><Pressable accessibilityLabel="فتح وضع قراءة الأذكار" onPress={() => openReminder(selected.items, 0, selected.id)} style={styles.voiceShortcut}><BookOpen color={palette.sage} size={22} /></Pressable></View>
           {selected.items.map((item, index) => {
             const value = counts[item.id] ?? 0;
             const complete = value >= item.count;
@@ -1154,7 +1155,7 @@ function AdhkarScreen({ onBack, openReminder, showError }: { onBack: () => void;
               {item.benefit ? <Text style={styles.dhikrBenefit}>{item.benefit}</Text> : null}
               {item.source ? <Text style={styles.dhikrSource}>{item.source}</Text> : null}
               <View style={styles.dhikrFooter}>
-                <Pressable accessibilityLabel="قراءة الذكر" onPress={() => openReminder(selected.items, index)} style={styles.listenButton}><BookOpen color={palette.sage} size={20} /></Pressable>
+                <Pressable accessibilityLabel="قراءة الذكر" onPress={() => openReminder(selected.items, index, selected.id)} style={styles.listenButton}><BookOpen color={palette.sage} size={20} /></Pressable>
                 <Pressable onPress={() => increment(item)} style={[styles.countButton, complete && styles.countButtonDone]}><Text style={styles.countButtonText}>{complete ? "تم" : `${toArabicNumber(value)} / ${toArabicNumber(item.count)}`}</Text></Pressable>
               </View>
             </Card>;
@@ -1582,14 +1583,71 @@ function SettingsChoice({ label, value, options, onChange }: { label: string; va
 
 
 
-function ReminderScreen({ items, initialIndex, onClose }: { items: DhikrItem[]; initialIndex: number; onClose: () => void }) {
+function ReminderScreen({ items, initialIndex, categoryId, onClose }: { items: DhikrItem[]; initialIndex: number; categoryId: string; onClose: () => void }) {
   const [index, setIndex] = useState(initialIndex);
   const item = items[index];
+  
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingSound, setIsLoadingSound] = useState(false);
+
+  useEffect(() => {
+    return sound ? () => { sound.unloadAsync(); } : undefined;
+  }, [sound]);
+
+  const toggleSound = async () => {
+    if (sound) {
+      if (isPlaying) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await sound.playAsync();
+        setIsPlaying(true);
+      }
+    } else {
+      setIsLoadingSound(true);
+      try {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, staysActiveInBackground: true });
+        let url = "";
+        if (categoryId === "morning") {
+          url = "https://archive.org/download/Azkar_Al-Saba7/Azkar_Al-Saba7.mp3";
+        } else if (categoryId === "evening") {
+          url = "https://archive.org/download/azkar_almasaa_20201111/azkar_almasaa.mp3";
+        } else {
+          return; // No audio for this category
+        }
+        const { sound: newSound } = await Audio.Sound.createAsync({ uri: url }, { shouldPlay: true });
+        newSound.setOnPlaybackStatusUpdate((status: any) => {
+          if (status.isLoaded) {
+            setIsPlaying(status.isPlaying);
+            if (status.didJustFinish) setIsPlaying(false);
+          }
+        });
+        setSound(newSound);
+        setIsPlaying(true);
+      } catch (err) {
+        console.error("Failed to load sound", err);
+      } finally {
+        setIsLoadingSound(false);
+      }
+    }
+  };
+
+  const hasAudio = categoryId === "morning" || categoryId === "evening";
+
   if (!item) return null;
   return (
     <LinearGradient colors={["#315B4C", "#1D3A31"]} style={styles.reminderScreen}>
       <SafeAreaView style={styles.alertSafe} edges={["top", "bottom"]}>
-        <Pressable onPress={onClose} style={styles.reminderClose}><X color={palette.white} size={27} /></Pressable>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 24 }}>
+          {hasAudio ? (
+             <Pressable onPress={toggleSound} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(255,255,255,0.15)", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, gap: 8 }}>
+               {isLoadingSound ? <ActivityIndicator color="#F4D57C" size="small" /> : isPlaying ? <Pause color="#F4D57C" size={20} /> : <Play color="#F4D57C" size={20} />}
+               <Text style={{ color: "#F4D57C", fontWeight: "bold", fontSize: 14 }}>استماع للتلاوة الكاملة</Text>
+             </Pressable>
+          ) : <View />}
+          <Pressable onPress={onClose} style={styles.reminderClose}><X color={palette.white} size={27} /></Pressable>
+        </View>
         <Text style={styles.reminderEyebrow}>وضع القراءة · {toArabicNumber(index + 1)} من {toArabicNumber(items.length)}</Text>
         <Sparkles color="#F4D57C" size={60} />
         <Text style={styles.reminderText}>{item.text}</Text>
@@ -1613,7 +1671,7 @@ function NourAppRoot() {
   const [route, setRoute] = useState<Route>("home");
   const [error, setError] = useState<{ error: unknown; retry: () => void } | null>(null);
   const [toast, setToast] = useState("");
-  const [reminder, setReminder] = useState<{ items: DhikrItem[]; index: number } | null>(null);
+  const [reminder, setReminder] = useState<{ items: DhikrItem[]; index: number, categoryId: string } | null>(null);
   const [homeOpened, setHomeOpened] = useState(false);
   const hydrated = useNourStore((state) => state.hydrated);
   const hydrate = useNourStore((state) => state.hydrate);
@@ -1735,10 +1793,10 @@ function NourAppRoot() {
 
   const back = () => setRoute("home");
   const content = useMemo(() => {
-    if (route === "reminder" && reminder) return <ReminderScreen items={reminder.items} initialIndex={reminder.index} onClose={back} />;
+    if (route === "reminder" && reminder) return <ReminderScreen items={reminder.items} initialIndex={reminder.index} categoryId={reminder.categoryId} onClose={() => setRoute("adhkar")} />;
     const shared = { showError };
     if (route === "quran") return <QuranScreen onBack={back} {...shared} />;
-    if (route === "adhkar") return <AdhkarScreen onBack={back} {...shared} openReminder={(items, index) => { setReminder({ items, index }); setRoute("reminder"); }} />;
+    if (route === "adhkar") return <AdhkarScreen onBack={back} {...shared} openReminder={(items, index, categoryId) => { setReminder({ items, index, categoryId }); setRoute("reminder"); }} />;
     if (route === "radio") return <RadioScreen onBack={back} {...shared} />;
     if (route === "library") return <LibraryScreen onBack={back} {...shared} navigate={navigate} />;
     if (route === "books") return <BookLibraryScreen onBack={back} {...shared} showToast={showToast} />;

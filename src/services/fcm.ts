@@ -107,8 +107,8 @@ export function setupFCMForegroundHandler(): () => void {
   const unsubscribe = messaging().onMessage(async (remoteMessage) => {
     const data = remoteMessage.data ?? {};
     const channelId = (data.channelId as string) ?? "nour-reminders-v6";
-    const title = remoteMessage.notification?.title ?? data.title ?? "";
-    const body = remoteMessage.notification?.body ?? data.body ?? "";
+    const title = remoteMessage.notification?.title ?? (data.title as string | undefined) ?? "";
+    const body = remoteMessage.notification?.body ?? (data.body as string | undefined) ?? "";
     const categoryId = data.categoryId as string | undefined;
 
     await Notifications.scheduleNotificationAsync({
@@ -117,9 +117,13 @@ export function setupFCMForegroundHandler(): () => void {
         body,
         data: data as Record<string, unknown>,
         categoryIdentifier: categoryId,
-        // Sound is handled by the Android channel
+        sound: (data.sound as string) === "default" ? true : (data.sound as string) || undefined,
       },
-      trigger: null, // show immediately
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: new Date(),
+        channelId,
+      },
       identifier: (data.notifKey as string) ?? undefined,
     });
   });
@@ -149,9 +153,9 @@ export function setupFCMBackgroundHandler(): void {
     // We send data-only messages to trigger this headless task without Android building a default notification.
     // Now we build the notification manually via Expo so we can attach action buttons (categoryId).
     const data = remoteMessage.data ?? {};
-    const title = data.title;
-    const body = data.body;
-    const categoryId = data.categoryId;
+    const title = data.title as string | undefined;
+    const body = data.body as string | undefined;
+    const categoryId = data.categoryId as string | undefined;
     
     if (title || body) {
       await Notifications.scheduleNotificationAsync({
@@ -160,9 +164,14 @@ export function setupFCMBackgroundHandler(): void {
           body,
           data,
           categoryIdentifier: categoryId,
+          sound: data.sound === "default" ? true : (data.sound as string) || undefined,
         },
-        trigger: null,
-        identifier: data.notifKey,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: new Date(),
+          channelId: (data.channelId as string) ?? "nour-reminders-v6",
+        },
+        identifier: data.notifKey as string | undefined,
       });
     }
   });

@@ -253,6 +253,7 @@ function ActionButton({ label, onPress, secondary = false, disabled = false }: {
 export function BookLibraryScreen({ onBack, showError, showToast }: CommonProps) {
   const { colors } = useNourTheme();
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [readingBookUrl, setReadingBookUrl] = useState<string | null>(null);
   const { playBook, currentBook, isPlaying } = useAudioStore();
 
   const downloadLocalBook = async (book: LibraryBook) => {
@@ -270,9 +271,30 @@ export function BookLibraryScreen({ onBack, showError, showToast }: CommonProps)
   };
 
   const openBook = async (book: LibraryBook) => {
+    // If it's an archive.org URL, we use the embed UI for a native reading experience
     const bookUrl = book.downloadUrl || book.url;
-    await WebBrowser.openBrowserAsync(bookUrl, { presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN });
+    if (bookUrl.includes("archive.org/details/")) {
+      const embedUrl = bookUrl.replace("/details/", "/embed/") + "?ui=embed";
+      setReadingBookUrl(embedUrl);
+    } else {
+      setReadingBookUrl(bookUrl);
+    }
   };
+
+  if (readingBookUrl) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{ height: 60, backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+          <Pressable onPress={() => setReadingBookUrl(null)} style={{ padding: 8 }}>
+            <ArrowLeft color={colors.ink} size={24} />
+          </Pressable>
+          <Text style={{ flex: 1, textAlign: "center", fontSize: 18, fontWeight: "800", color: colors.ink }}>قراءة الكتاب</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <WebView source={{ uri: readingBookUrl }} style={{ flex: 1 }} />
+      </View>
+    );
+  }
 
   return (
     <FeatureScreen>

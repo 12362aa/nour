@@ -4,6 +4,7 @@
 // Deno runtime
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import adhan from "https://esm.sh/adhan@4.4.4";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -150,24 +151,48 @@ async function sendFCM(
 }
 
 // ── Prayer time calculation (simplified Adhan algorithm) ─────────────────────
-// Full adhan-js implementation embedded for Deno compatibility
-function calcPrayerTimes(date: Date, lat: number, lng: number, method: number, tz: string) {
-  // We use the Aladhan API since we can't bundle adhan-js easily in Deno
-  // This is called per-user only when needed
-  return null; // Placeholder — actual implementation below uses Aladhan API
+// Uses adhan-js locally
+function getCalculationMethod(methodValue: number) {
+  switch (methodValue) {
+    case 1: return adhan.CalculationMethod.Karachi();
+    case 2: return adhan.CalculationMethod.NorthAmerica();
+    case 3: return adhan.CalculationMethod.MuslimWorldLeague();
+    case 4: return adhan.CalculationMethod.UmmAlQura();
+    case 5: return adhan.CalculationMethod.Egyptian();
+    case 7: return adhan.CalculationMethod.Tehran();
+    case 8: return adhan.CalculationMethod.Dubai();
+    case 9: return adhan.CalculationMethod.Kuwait();
+    case 10: return adhan.CalculationMethod.Qatar();
+    case 11: return adhan.CalculationMethod.MoonsightingCommittee();
+    case 12: return adhan.CalculationMethod.Singapore();
+    case 13: return adhan.CalculationMethod.Turkey();
+    default: return adhan.CalculationMethod.MuslimWorldLeague();
+  }
 }
 
-async function getPrayerTimesForUser(lat: number, lng: number, method: number, date: Date): Promise<Record<string, string> | null> {
-  const d = date.getDate().toString().padStart(2, "0");
-  const m = (date.getMonth() + 1).toString().padStart(2, "0");
-  const y = date.getFullYear();
-  const url = `https://api.aladhan.com/v1/timings/${d}-${m}-${y}?latitude=${lat}&longitude=${lng}&method=${method}`;
+async function getPrayerTimesForUser(lat: number, lng: number, method: number, date: Date, tz: string): Promise<Record<string, string> | null> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.data?.timings ?? null;
-  } catch {
+    const coordinates = new adhan.Coordinates(lat, lng);
+    const calcMethod = getCalculationMethod(method);
+    
+    // adhan-js expects the date at noon for accurate calculations
+    const dateQuery = new Date(date.getTime());
+    dateQuery.setHours(12, 0, 0, 0);
+
+    const prayerTimes = new adhan.PrayerTimes(coordinates, dateQuery, calcMethod);
+
+    const formatTime = (d: Date) => 
+      Intl.DateTimeFormat('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+
+    return {
+      Fajr: formatTime(prayerTimes.fajr),
+      Dhuhr: formatTime(prayerTimes.dhuhr),
+      Asr: formatTime(prayerTimes.asr),
+      Maghrib: formatTime(prayerTimes.maghrib),
+      Isha: formatTime(prayerTimes.isha),
+    };
+  } catch (error) {
+    console.error("Prayer calc error:", error);
     return null;
   }
 }
@@ -335,9 +360,9 @@ async function handler(req: Request) {
       }
     }
 
-    // ── Check prayers ──
+    // 🌟 Check prayers 🌟
     if (!prefs.mute_prayers_today) {
-      const prayerTimings = await getPrayerTimesForUser(prefs.latitude, prefs.longitude, prefs.calc_method, userNow);
+      const prayerTimings = await getPrayerTimesForUser(prefs.latitude, prefs.longitude, prefs.calc_method, userNow, tz);
       if (prayerTimings) {
         const prayerFields: Record<string, string> = {
           Fajr: "prayer_fajr", Dhuhr: "prayer_dhuhr",
