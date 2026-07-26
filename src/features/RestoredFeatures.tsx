@@ -304,22 +304,24 @@ export function BookLibraryScreen({ onBack, showError, showToast }: CommonProps)
         const downloading = Boolean(progress[book.id]);
         return (
           <Pressable key={book.id} onPress={() => void openBook(book)}>
-            <FeatureCard style={styles.bookRow}>
-              {book.cover.startsWith("http") ? (
-                <Image source={{ uri: book.cover }} style={[styles.bookCover, { backgroundColor: colors.surfaceSoft }]} resizeMode="cover" />
-              ) : (
-                <View style={[styles.bookCover, { backgroundColor: colors.primary }]}><Text style={styles.bookCoverText}>{book.cover}</Text></View>
-              )}
-              <View style={styles.grow}>
-                <Text style={[styles.cardTitle, { color: colors.ink }]}>{book.title}</Text>
-                <Text style={[styles.meta, { color: colors.gold }]}>{book.author} · {book.category}</Text>
-                <Text style={[styles.smallBody, { color: colors.muted }]}>{book.description}</Text>
-                {downloading ? <Text style={[styles.progress, { color: colors.primary }]}>جاري التحميل... {Math.round(progress[book.id] * 100)}%</Text> : null}
+            <FeatureCard>
+              <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
+                {book.cover.startsWith("http") ? (
+                  <Image source={{ uri: book.cover }} style={[styles.bookCover, { backgroundColor: colors.surfaceSoft }]} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.bookCover, { backgroundColor: colors.primary }]}><Text style={styles.bookCoverText}>{book.cover}</Text></View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardTitle, { color: colors.ink, textAlign: "right" }]}>{book.title}</Text>
+                  <Text style={[styles.meta, { color: colors.gold, textAlign: "right", marginBottom: 4 }]}>{book.author} · {book.category}</Text>
+                  <Text style={[styles.smallBody, { color: colors.muted, textAlign: "right", lineHeight: 20 }]} numberOfLines={3}>{book.description}</Text>
+                  {downloading ? <Text style={[styles.progress, { color: colors.primary }]}>جاري التحميل... {Math.round(progress[book.id] * 100)}%</Text> : null}
+                </View>
               </View>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <Pressable onPress={() => void openBook(book)} style={[{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, backgroundColor: colors.primary, height: 42, paddingHorizontal: 16, borderRadius: 21 }]}>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 16, alignItems: "center" }}>
+                <Pressable onPress={() => void openBook(book)} style={[{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, backgroundColor: colors.primary, height: 42, paddingHorizontal: 16, borderRadius: 21 }]}>
                   <BookOpen color="#FFFFFF" size={18} />
-                  <Text style={{ color: "#FFFFFF", fontSize: 13, fontWeight: "800" }}>قراءة</Text>
+                  <Text style={{ color: "#FFFFFF", fontSize: 13, fontWeight: "800" }}>قراءة الكتاب</Text>
                 </Pressable>
                 {book.downloadUrl ? (
                   <Pressable disabled={downloading} onPress={() => void downloadLocalBook(book)} style={[styles.roundAction, { backgroundColor: colors.surfaceSoft }]}>
@@ -557,8 +559,7 @@ export function AccountScreen({ onBack, showError, showToast }: CommonProps) {
           </FeatureCard>
 
           <View style={{ flexDirection: "row", justifyContent: "center", gap: 16, marginTop: 12 }}>
-            <Pressable onPress={() => Linking.openURL("https://nour-app.com/privacy")}><Text style={{ color: colors.muted, fontSize: 13, textDecorationLine: "underline" }}>سياسة الخصوصية</Text></Pressable>
-            <Pressable onPress={() => Linking.openURL("https://nour-app.com/terms")}><Text style={{ color: colors.muted, fontSize: 13, textDecorationLine: "underline" }}>الشروط والأحكام</Text></Pressable>
+            {/* تم إخفاء الروابط مؤقتاً لحين توفر محتوى حقيقي */}
           </View>
         </>
       ) : (
