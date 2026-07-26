@@ -291,8 +291,8 @@ function useResource<T>(loader: () => Promise<T>, dependencies: unknown[] = []) 
   return { resource, reload };
 }
 
-function toArabicNumber(value: number) {
-  return value.toLocaleString("en-US");
+function toArabicNumber(value: number | string) {
+  return String(value);
 }
 
 function Card({ children, style }: { children: React.ReactNode; style?: object }) {
@@ -1310,9 +1310,39 @@ function NameDetail({ item, all, onSelect, onBack }: { item: AllahName; all: All
           <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 8 }} />
           
           <View>
-            <NativeText style={{ fontSize: 18, color: colors.primary, fontWeight: "800", marginBottom: 8, textAlign: "right" }}>ثمرة الإيمان بالاسم</NativeText>
+            <NativeText style={{ fontSize: 18, color: colors.primary, fontWeight: "800", marginBottom: 8, textAlign: "right" }}>الفوائد والأحكام</NativeText>
             <NativeText style={{ fontSize: 16, color: colors.ink, lineHeight: 26, textAlign: "right" }}>{item.benefit}</NativeText>
           </View>
+
+          {(item as any).reflections ? (
+            <>
+              <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 8 }} />
+              <View>
+                <NativeText style={{ fontSize: 18, color: colors.primary, fontWeight: "800", marginBottom: 8, textAlign: "right" }}>وقفات تأملية</NativeText>
+                <NativeText style={{ fontSize: 16, color: colors.ink, lineHeight: 26, textAlign: "right" }}>{(item as any).reflections}</NativeText>
+              </View>
+            </>
+          ) : null}
+
+          {(item as any).duaa ? (
+            <>
+              <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 8 }} />
+              <View>
+                <NativeText style={{ fontSize: 18, color: colors.primary, fontWeight: "800", marginBottom: 8, textAlign: "right" }}>الدعاء بالاسم</NativeText>
+                <NativeText style={{ fontSize: 16, color: colors.ink, lineHeight: 26, textAlign: "right" }}>{(item as any).duaa}</NativeText>
+              </View>
+            </>
+          ) : null}
+
+          {(item as any).scholarsSayings ? (
+            <>
+              <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 8 }} />
+              <View>
+                <NativeText style={{ fontSize: 18, color: colors.primary, fontWeight: "800", marginBottom: 8, textAlign: "right" }}>أقوال العلماء</NativeText>
+                <NativeText style={{ fontSize: 16, color: colors.ink, lineHeight: 26, textAlign: "right" }}>{(item as any).scholarsSayings}</NativeText>
+              </View>
+            </>
+          ) : null}
         </Card>
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", marginTop: 16 }}>
