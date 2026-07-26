@@ -638,7 +638,11 @@ function HomeScreen({
           setUpdateUrl(apkAsset ? apkAsset.browser_download_url : "https://github.com/12362aa/nour/releases/latest");
           
           const seen = await AsyncStorage.getItem("@update_message_seen_" + latestTag);
-          if (seen) setUpdateSeen(true);
+          if (seen) {
+            setUpdateSeen(true);
+          } else {
+            setShowUpdateModal(true);
+          }
         }
       } catch (err) {
         console.warn("[nour:update] Failed to check for updates", err);
@@ -891,7 +895,7 @@ function HomeScreen({
 
       <Modal visible={showUpdateModal} transparent animationType="fade" onRequestClose={() => setShowUpdateModal(false)}>
         <View style={styles.modalBackdrop}>
-          <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(150)} style={[styles.errorModal, { backgroundColor: colors.surface }]}>
+          <View style={[styles.errorModal, { backgroundColor: colors.surface }]}>
             <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: colors.surfaceSoft, alignItems: "center", justifyContent: "center" }}>
               <Sparkles color={colors.gold} size={28} />
             </View>
@@ -921,7 +925,7 @@ function HomeScreen({
                 <Text style={styles.closeModalText}>لاحقاً</Text>
               </Pressable>
             </View>
-          </Animated.View>
+          </View>
         </View>
       </Modal>
 
