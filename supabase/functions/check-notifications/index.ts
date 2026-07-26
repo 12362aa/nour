@@ -289,6 +289,7 @@ async function handler(req: Request) {
     for (const rem of REMINDERS) {
       if (!prefs[rem.field]) continue;
       if (rem.dayFilter !== undefined && userDay !== rem.dayFilter) continue;
+      if (isTest) {
           console.log("[fcm] Executing test mode");
           const notifKey = "test::" + Date.now();
           const sent = await sendFCM(prefs.fcm_token, "إشعار تجريبي 🧪", "هذا الإشعار لتأكيد عمل نظام Firebase بنجاح!", "nour-reminders-v5", "default", { type: "test", notifKey });
