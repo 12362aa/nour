@@ -1,0 +1,40 @@
+function NameDetail({ item, all, onSelect, onBack }: { item: AllahName; all: AllahName[]; onSelect: (item: AllahName) => void; onBack: () => void }) {
+  const { colors } = useNourTheme();
+  const next = all[item.number] ?? all[0];
+  const previous = all[item.number - 2] ?? all[all.length - 1];
+  return (
+    <Screen>
+      
+
+      <Header title="أسماء الله الحسنى" subtitle={`الاسم ${toArabicNumber(item.number)} من ٩٩`} onBack={onBack} />
+      <ImageBackground source={{ uri: item.imageUrl }} style={{ width: "100%", height: 160, borderRadius: 24, overflow: "hidden", justifyContent: "center", alignItems: "center", marginVertical: 8 }} imageStyle={{ borderRadius: 24, opacity: 0.35 }}>
+        <View style={{ backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}>
+          <NativeText style={{ fontSize: 36, fontWeight: "900", color: "#FFFFFF", textAlign: "center" }}>{item.name}</NativeText>
+        </View>
+      </ImageBackground>
+      <Card>
+        <Text style={[styles.detailLabel, { color: colors.gold }]}>المعنى المختصر</Text>
+        <Text style={[styles.detailMeaning, { color: colors.ink }]}>{item.meaning}</Text>
+      </Card>
+      <Card>
+        <Text style={[styles.detailLabel, { color: colors.gold }]}>تأمل وإحسان العبادة</Text>
+        <Text style={[styles.detailText, { color: colors.ink, lineHeight: 26 }]}>{item.benefit}</Text>
+      </Card>
+      {item.evidence ? (
+        <Card>
+          <Text style={[styles.detailLabel, { color: colors.gold }]}>الدليل من القرآن والسنة</Text>
+          <Text style={[styles.detailText, { color: colors.ink, lineHeight: 26 }]}>{item.evidence}</Text>
+        </Card>
+      ) : (
+        <Card>
+          <Text style={[styles.detailLabel, { color: colors.gold }]}>حديث نبوي شريف</Text>
+          <Text style={[styles.detailText, { color: colors.ink, lineHeight: 24 }]}>«إنّ لِلَّهِ تِسْعَةً وَتِسْعِينَ اسْمًا مِائَةً إلَّا واحِدًا، مَنْ أحْصَاهَا دَخَلَ الجَنَّةَ» — متفق عليه.</Text>
+        </Card>
+      )}
+      <View style={styles.detailNavigation}>
+        <PrimaryButton label="السابق" onPress={() => onSelect(previous)} icon={ChevronRight} secondary />
+        <PrimaryButton label="التالي" onPress={() => onSelect(next)} icon={ChevronLeft} />
+      </View>
+    </Screen>
+  );
+}

@@ -1,0 +1,244 @@
+function SplashAnimation({ isAppReady, onFinish }: { isAppReady: boolean; onFinish: () => void }) {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.8);
+
+  useEffect(() => {
+    void SplashScreen.hideAsync().catch(() => {});
+    opacity.value = withTiming(1, { duration: 500 });
+    scale.value = withTiming(1, { duration: 600 });
+  }, []);
+
+  useEffect(() => {
+    if (isAppReady) {
+      const timer = setTimeout(() => {
+        opacity.value = withTiming(0, { duration: 300 });
+        scale.value = withTiming(0.95, { duration: 300 });
+        setTimeout(onFinish, 300);
+      }, 1000); // Ensure it stays at least 1s
+      return () => clearTimeout(timer);
+    }
+  }, [isAppReady]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <NativeView style={{ flex: 1, backgroundColor: palette.dark, alignItems: "center", justifyContent: "center" }}>
+      <StatusBar style="light" />
+      <Animated.View style={[{ alignItems: "center" }, style]}>
+        <MoonStar color={palette.gold} size={80} strokeWidth={1.5} />
+        <NativeText style={{ color: palette.gold, fontSize: 32, fontWeight: "900", marginTop: 24, letterSpacing: 2 }}>نور</NativeText>
+        <NativeText style={{ color: "#A8B4AC", fontSize: 16, marginTop: 8 }}>تطبيق المسلم اليومي</NativeText>
+      </Animated.View>
+    </NativeView>
+  );
+}
+
+const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, huge: 48 };
+const FONT = { h1: 28, h2: 20, body: 16, caption: 13 };
+
+type ThemeStyleKey = "backgroundColor" | "borderColor" | "color" | "shadowColor";
+
+function mapThemeColor(value: unknown, colors: ReturnType<typeof useNourTheme>["colors"], key: ThemeStyleKey) {
+  if (typeof value !== "string") return value;
+  if (key === "color") {
+    if (value === palette.ink) return colors.ink;
+    if (value === palette.muted) return colors.muted;
+    if (value === palette.sage) return colors.primary;
+    if (value === "#214137") return colors.ink;
+    return value;
+  }
+  if (value === palette.white) return colors.surface;
+  if (value === palette.cream || value === "#FFFDF8") return colors.background;
+  if (value === palette.goldSoft || value === palette.sageSoft || value === "#FFF8E9" || value === "#FFF9E9" || value === "#F3E2B5" || value === "#EEE8DD") return colors.surfaceSoft;
+  if (value === palette.ink) return colors.ink;
+  if (value === palette.muted) return colors.muted;
+  if (value === palette.sage) return colors.primary;
+  if (value === palette.border || value === "#CDDFD4" || value === "#C9E1CF") return colors.border;
+  return value;
+}
+
+function themedStyle(style: any, colors: ReturnType<typeof useNourTheme>["colors"]): any {
+  const flattened = StyleSheet.flatten(style as never) as Record<string, unknown> | undefined;
+  if (!flattened) return style;
+  const mapped = { ...flattened };
+  for (const key of ["backgroundColor", "borderColor", "color", "shadowColor"] as ThemeStyleKey[]) {
+    if (key in mapped) mapped[key] = mapThemeColor(mapped[key], colors, key);
+  }
+  return [style, mapped] as never;
+}
+
+function Text({ style, ...props }: TextProps) {
+  const { colors } = useNourTheme();
+  return <NativeText {...props} style={themedStyle(style, colors)} />;
+}
+
+function TextInput({ style, ...props }: TextInputProps) {
+  const { colors } = useNourTheme();
+  return <NativeTextInput {...props} style={themedStyle(style, colors)} />;
+}
+
+function View({ style, ...props }: ViewProps) {
+  const { colors } = useNourTheme();
+  return <NativeView {...props} style={themedStyle(style, colors)} />;
+}
+
+function Pressable({ style, ...props }: PressableProps) {
+  const { colors } = useNourTheme();
+  const themed = typeof style === "function"
+    ? (state: PressableStateCallbackType) => themedStyle(style(state), colors)
+    : themedStyle(style, colors);
+  return <NativePressable {...props} style={themed} />;
+}
+const prayerLabels: Array<[keyof PrayerTimes, string]> = [
+  ["Fajr", "الفجر"],
+  ["Sunrise", "الشروق"],
+  ["Dhuhr", "الظهر"],
+  ["Asr", "العصر"],
+  ["Maghrib", "المغرب"],
+  ["Isha", "العشاء"],
+];
+
+type PrayerVisualKey = "Fajr" | "Dhuhr" | "Asr" | "Maghrib" | "Isha";
+const prayerBackgrounds: Record<PrayerVisualKey, number> = {
+  Fajr: require("../assets/prayer-backgrounds/fajr-bg.png"),
+  Dhuhr: require("../assets/prayer-backgrounds/dhuhr-bg.png"),
+  Asr: require("../assets/prayer-backgrounds/asr-bg.png"),
+  Maghrib: require("../assets/prayer-backgrounds/maghrib-bg.png"),
+  Isha: require("../assets/prayer-backgrounds/isha-bg.png"),
+};
+
+const prayerVisualLabels: Array<[PrayerVisualKey, string]> = prayerLabels.filter(
+  (item): item is [PrayerVisualKey, string] => item[0] !== "Sunrise",
+);
+
+function prayerTarget(time: string, base: Date, tomorrow = false) {
+  const [hour, minute] = time.replace(/\s*\(.+?\)/g, "").split(":").map(Number);
+  const target = new Date(base);
+  if (tomorrow) target.setDate(target.getDate() + 1);
+  target.setHours(hour, minute, 0, 0);
+  return target;
+}
+
+function formatCountdown(milliseconds: number) {
+  const total = Math.max(0, Math.floor(milliseconds / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return [hours, minutes, seconds]
+    .map((value) => value.toLocaleString("en-US", { minimumIntegerDigits: 2, useGrouping: false }))
+    .join(":");
+}
+
+type Route =
+  | "home"
+  | "quran"
+  | "adhkar"
+  | "radio"
+  | "library"
+  | "books"
+  | "hadith-books"
+  | "qibla"
+  | "account"
+  | "tools"
+  | "names"
+  | "settings"
+  | "more"
+  | "adhan"
+  | "reminder"
+  | "about"
+  | "tracker"
+  | "khatma";
+type Resource<T> = { phase: "loading" | "success" | "error"; data?: T; error?: unknown };
+
+function useResource<T>(loader: () => Promise<T>, dependencies: unknown[] = []) {
+  const [resource, setResource] = useState<Resource<T>>({ phase: "loading" });
+  const reload = useCallback(async () => {
+    setResource({ phase: "loading" });
+    try {
+      setResource({ phase: "success", data: await loader() });
+    } catch (error) {
+      setResource({ phase: "error", error });
+    }
+  }, dependencies); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+  return { resource, reload };
+}
+
+function toArabicNumber(value: number) {
+  return value.toLocaleString("en-US");
+}
+
+function Card({ children, style }: { children: React.ReactNode; style?: object }) {
+  const { colors } = useNourTheme();
+  return <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, style]}>{children}</View>;
+}
+
+function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
+  const { colors } = useNourTheme();
+  if (!scroll) return <View style={[styles.screen, { backgroundColor: colors.background }]}>{children}</View>;
+  return (
+    <ScrollView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {children}
+    </ScrollView>
+  );
+}
+
+function Header({ title, subtitle, onBack, navigate, onInfoPress, showInfoBadge }: { title: string; subtitle?: string; onBack?: () => void; navigate?: (route: Route) => void; onInfoPress?: () => void; showInfoBadge?: boolean; }) {
+  const { colors } = useNourTheme();
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
+  const [displayName, setDisplayName] = useState<string | undefined>();
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour >= 18;
+
+  useEffect(() => {
+    if (navigate && !onBack) {
+      void getCurrentCloudProfile().then((profile) => {
+        setAvatarUrl(profile?.avatarUri);
+        setDisplayName(profile?.name);
+      }).catch(() => undefined);
+    }
+  }, [navigate, onBack]);
+
+  const displayTitle = (title === "نور" && displayName && displayName !== "مستخدم جديد") ? `مرحبًا يا ${displayName}` : title;
+
+  return (
+    <View style={styles.header}>
+      {onBack ? (
+        <Pressable accessibilityLabel="رجوع" onPress={onBack} style={styles.iconButton}>
+          <ArrowLeft color={colors.primary} size={24} />
+        </Pressable>
+      ) : (
+        <View style={[styles.logoMark, { width: 50, height: 50, borderRadius: 16, backgroundColor: colors.surfaceSoft, justifyContent: "center", alignItems: "center" }]}>
+          <AnimatedHeaderVisual isNight={isNight} />
+        </View>
+      )}
+      <View style={styles.headerCopy}>
+        <NativeText style={[styles.headerTitle, { color: colors.ink }]}>{displayTitle}</NativeText>
+        {subtitle ? <NativeText style={styles.headerSubtitle}>{subtitle}</NativeText> : null}
+      </View>
+      {navigate && !onBack ? (
+        <Pressable
+          onPress={() => navigate("account")}
+          style={[styles.iconButton, { overflow: "hidden" }]}
+          accessibilityLabel="إدارة الحساب"
+        >
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={{ width: 48, height: 48, borderRadius: 17 }} />
+          ) : (
+            <UserRound color={colors.primary} size={24} />
+          )}
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}

@@ -1,0 +1,151 @@
+export type LibraryBook = {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  description: string;
+  cover: string;
+  url: string;
+  downloadUrl?: string;
+  audioUrl?: string;
+};
+
+export const LIBRARY_BOOKS: LibraryBook[] = [
+  {
+    id: "riyad",
+    title: "رياض الصالحين",
+    author: "الإمام النووي",
+    category: "حديث",
+    description: "أبواب جامعة من القرآن والسنة في الأخلاق والعبادات.",
+    cover: "https://archive.org/services/img/FP93317",
+    url: "https://waqfeya.net/book.php?bid=11904",
+    downloadUrl: "https://archive.org/download/FP93317/93317.pdf",
+    audioUrl: "https://archive.org/download/Riad_Alsalheen__AlDuraihim/001.mp3",
+  },
+  {
+    id: "adhkar-nawawi",
+    title: "الأذكار",
+    author: "الإمام النووي",
+    category: "أذكار",
+    description: "أذكار اليوم والليلة والدعوات المأثورة.",
+    cover: "https://archive.org/services/img/WAQranbWAQ",
+    url: "https://waqfeya.net/book.php?bid=7725",
+    downloadUrl: "https://archive.org/download/WAQranbWAQ/ranb.pdf",
+    audioUrl: "https://archive.org/download/025-624-664_202203/001-من ص {27} إلى ص {48}.mp3",
+  },
+  {
+    id: "tafsir-saadi",
+    title: "تفسير السعدي",
+    author: "عبد الرحمن السعدي",
+    category: "تفسير",
+    description: "تيسير كريم الرحمن في تفسير كلام المنان.",
+    cover: "https://archive.org/services/img/Tafseeerr",
+    url: "https://waqfeya.net/book.php?bid=10108",
+    downloadUrl: "https://archive.org/download/Tafseeerr/Tafseeerr.pdf",
+    audioUrl: "https://archive.org/download/qiraat-tafsir-saadi-arfaj/000.mp3",
+  },
+  {
+    id: "fiqh-sunna",
+    title: "فقه السنة",
+    author: "السيد سابق",
+    category: "فقه",
+    description: "عرض مبسط لأحكام الفقه المستندة للدليل.",
+    cover: "https://archive.org/services/img/Pdf4116",
+    url: "https://waqfeya.net/book.php?bid=1138",
+    downloadUrl: "https://archive.org/download/Pdf4116/Pdf4116.pdf",
+    audioUrl: "https://archive.org/download/Fiqh-Assunah/01-01.mp3",
+  },
+  {
+    id: "sealed-nectar",
+    title: "الرحيق المختوم",
+    author: "صفي الرحمن المباركفوري",
+    category: "سيرة",
+    description: "السيرة النبوية منذ الميلاد حتى الوفاة.",
+    cover: "https://archive.org/services/img/FP84455",
+    url: "https://waqfeya.net/book.php?bid=1051",
+    downloadUrl: "https://archive.org/download/FP84455/84455.pdf",
+  },
+  {
+    id: "hisn-muslim",
+    title: "حصن المسلم",
+    author: "سعيد بن علي القحطاني",
+    category: "أذكار",
+    description: "أدعية وأذكار من الكتاب والسنة.",
+    cover: "https://archive.org/services/img/7sn-muslem",
+    url: "https://waqfeya.net/books/%D8%AD%D8%B5%D9%86-%D8%A7%D9%84%D9%85%D8%B3%D9%84%D9%85-%D9%85%D9%86-%D8%A3%D8%B0%D9%83%D8%A7%D8%B1-%D8%A7%D9%84%D9%83%D8%AA%D8%A7%D8%A8-%D9%88%D8%A7%D9%84%D8%B3%D9%86%D8%A9/46e56babaf0c46aa9cee4470d5b0e45f",
+    downloadUrl: "https://archive.org/download/7sn-muslem/7sn-muslem.pdf",
+    audioUrl: "https://archive.org/download/khaled_alridwany_028_201502/001.mp3",
+  },
+  {
+    id: "forty-nawawi",
+    title: "الأربعون النووية",
+    author: "الإمام النووي",
+    category: "حديث",
+    description: "أحاديث جوامع في أصول الدين.",
+    cover: "https://archive.org/services/img/40Nawawia",
+    url: "https://waqfeya.net/book.php?bid=1077",
+    downloadUrl: "https://archive.org/download/40Nawawia/40Nawawia.pdf",
+    audioUrl: "https://archive.org/download/40Nawawia/قراءة الأربعون النووية  حمد الدريهم.mp3",
+  },
+  {
+    id: "madarij",
+    title: "مدارج السالكين",
+    author: "ابن قيم الجوزية",
+    category: "تزكية",
+    description: "رحلة القلب إلى الله ومنازل إياك نعبد.",
+    cover: "https://archive.org/services/img/madarej_salekeen",
+    url: "https://waqfeya.net/book.php?bid=509",
+    downloadUrl: "https://archive.org/download/madarej_salekeen/madarej_salekeen.pdf",
+  },
+  {
+    id: "bulugh",
+    title: "بلوغ المرام",
+    author: "ابن حجر العسقلاني",
+    category: "حديث",
+    description: "أحاديث الأحكام الجامعة لأبواب الفقه.",
+    cover: "https://archive.org/services/img/0501BulooghAlQasim",
+    url: "https://waqfeya.net/search.php?q=%D8%A8%D9%84%D9%88%D8%BA+%D8%A7%D9%84%D9%85%D8%B1%D8%A7%D9%85",
+    downloadUrl: "https://archive.org/download/0501BulooghAlQasim/0501BulooghAlQasim.pdf",
+  },
+  {
+    id: "zad-maad",
+    title: "زاد المعاد",
+    author: "ابن قيم الجوزية",
+    category: "سيرة",
+    description: "هدي النبي ﷺ في عباداته ومعاملاته.",
+    cover: "https://archive.org/services/img/zad_elmaad",
+    url: "https://waqfeya.net/search.php?q=%D8%B2%D8%A7%D8%AF+%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF",
+    downloadUrl: "https://archive.org/download/zad_elmaad/zad_elmaad.pdf",
+  },
+  {
+    id: "ibn-kathir",
+    title: "تفسير ابن كثير",
+    author: "ابن كثير",
+    category: "تفسير",
+    description: "من أشهر كتب التفسير بالمأثور.",
+    cover: "https://archive.org/services/img/tfsiribnkathir",
+    url: "https://waqfeya.net/search.php?q=%D8%AA%D9%81%D8%B3%D9%8A%D8%B1+%D8%A7%D8%A8%D9%86+%D9%83%D8%AB%D9%8A%D8%B1",
+    downloadUrl: "https://archive.org/download/tfsiribnkathir/tfsiribnkathir.pdf",
+  },
+  {
+    id: "shamaael",
+    title: "الشمائل المحمدية",
+    author: "الإمام الترمذي",
+    category: "سيرة",
+    description: "شمائل النبي ﷺ وصفاته وهديه.",
+    cover: "https://archive.org/services/img/ShamailTirmithi",
+    url: "https://waqfeya.net/search.php?q=%D8%A7%D9%84%D8%B4%D9%85%D8%A7%D8%A6%D9%84+%D8%A7%D9%84%D9%85%D8%AD%D9%85%D8%AF%D9%8A%D8%A9",
+    downloadUrl: "https://archive.org/download/ShamailTirmithi/ShamailTirmithi.pdf",
+  },
+];
+
+export const HADITH_EDITIONS = [
+  { id: "ara-bukhari", title: "صحيح البخاري", count: "٧٥٨٩ حديثاً" },
+  { id: "ara-muslim", title: "صحيح مسلم", count: "٧٥٦٣ حديثاً" },
+  { id: "ara-abudawud", title: "سنن أبي داود", count: "٥٢٧٤ حديثاً" },
+  { id: "ara-tirmidhi", title: "سنن الترمذي", count: "٣٩٩٨ حديثاً" },
+  { id: "ara-nasai", title: "سنن النسائي", count: "٥٧٦٥ حديثاً" },
+  { id: "ara-ibnmajah", title: "سنن ابن ماجه", count: "٤٣٤٣ حديثاً" },
+  { id: "ara-malik", title: "موطأ مالك", count: "١٨٥٨ حديثاً" },
+  { id: "ara-qudsi", title: "الأربعون القدسية", count: "٤٠ حديثاً" },
+];

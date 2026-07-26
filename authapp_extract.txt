@@ -1,0 +1,16 @@
+function AuthenticatedApp() {
+  const { mode, showWelcome } = useNourAuth();
+  const [splashFinished, setSplashFinished] = useState(false);
+
+  if (!splashFinished) {
+    return <SplashAnimation isAppReady={mode !== "loading"} onFinish={() => setSplashFinished(true)} />;
+  }
+
+  if (mode === "signed-out" || showWelcome) return <AuthGate />;
+  return (
+    <>
+      <NourAppRoot />
+      <FloatingAudioPlayer />
+    </>
+  );
+}

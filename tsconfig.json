@@ -1,0 +1,14 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": [
+    "App.tsx",
+    "index.ts",
+    "src/NourApp.tsx",
+    "src/services/content.ts",
+    "src/services/fullScreenNotifications.ts",
+    "src/services/storage.ts"
+  ]
+}

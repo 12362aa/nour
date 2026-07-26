@@ -1,0 +1,49 @@
+function Header({ title, subtitle, onBack, navigate }: { title: string; subtitle?: string; onBack?: () => void; navigate?: (route: Route) => void }) {
+  const { colors } = useNourTheme();
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
+  const [displayName, setDisplayName] = useState<string | undefined>();
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour >= 18;
+
+  useEffect(() => {
+    if (navigate && !onBack) {
+      void getCurrentCloudProfile().then((profile) => {
+        setAvatarUrl(profile?.avatarUri);
+        setDisplayName(profile?.name);
+      }).catch(() => undefined);
+    }
+  }, [navigate, onBack]);
+
+  const displayTitle = (title === "نور" && displayName && displayName !== "مستخدم جديد") ? `مرحبًا يا ${displayName}` : title;
+
+  return (
+    <View style={styles.header}>
+      {onBack ? (
+        <Pressable accessibilityLabel="رجوع" onPress={onBack} style={styles.iconButton}>
+          <ArrowLeft color={colors.primary} size={24} />
+        </Pressable>
+      ) : (
+        <View style={[styles.logoMark, { width: 50, height: 50, borderRadius: 16, backgroundColor: colors.surfaceSoft, justifyContent: "center", alignItems: "center" }]}>
+          <AnimatedHeaderVisual isNight={isNight} />
+        </View>
+      )}
+      <View style={styles.headerCopy}>
+        <NativeText style={[styles.headerTitle, { color: colors.ink }]}>{displayTitle}</NativeText>
+        {subtitle ? <NativeText style={styles.headerSubtitle}>{subtitle}</NativeText> : null}
+      </View>
+      {navigate && !onBack ? (
+        <Pressable
+          onPress={() => navigate("account")}
+          style={[styles.iconButton, { overflow: "hidden" }]}
+          accessibilityLabel="إدارة الحساب"
+        >
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={{ width: 48, height: 48, borderRadius: 17 }} />
+          ) : (
+            <UserRound color={colors.primary} size={24} />
+          )}
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}

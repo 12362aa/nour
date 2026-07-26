@@ -1,0 +1,1 @@
+const now = new Date("2026-07-26T04:15:00Z"); const tz = "Africa/Cairo"; const userNow = new Date(now.toLocaleString("en-US", { timeZone: tz })); console.log("userNow:", userNow.toISOString()); console.log("getHours:", userNow.getHours()); console.log("getMinutes:", userNow.getMinutes());

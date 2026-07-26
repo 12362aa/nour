@@ -1,0 +1,329 @@
+function AboutScreen({ onBack }: { onBack: () => void }) {
+  const { colors } = useNourTheme();
+  const openLink = (url: string) => { void Linking.openURL(url); };
+  return (
+    <Screen>
+      
+
+      <Header title="عن نور" subtitle="رسالة وتواصل" onBack={onBack} />
+      <Card style={{ alignItems: "center", gap: spacing.md, paddingVertical: spacing.xl }}>
+        <Image
+          source={require("../assets/nour-logo.jpg")}
+          style={{ width: 140, height: 140, resizeMode: "contain" }}
+        />
+        <Text style={[styles.cardTitle, { color: colors.ink, fontSize: 24, textAlign: "center", fontWeight: "900" }]}>نور</Text>
+        <Text style={[styles.cardBody, { color: colors.muted, textAlign: "center", lineHeight: 24 }]}>
+          تطبيق إسلامي اتعمل لوجه الله الكريم من مطور مصري مسلم، هدفه مساعدة المسلمين على إقامة شعائرهم وذكر الله في يومهم. لا يجمع بيانات شخصية ولا يعرض إعلانات.
+        </Text>
+      </Card>
+
+      <SectionTitle title="نور على منصات أخرى" />
+      <Card style={{ gap: spacing.md }}>
+        <Pressable onPress={() => openLink("https://t.me/Islamic72_bot")} style={[styles.settingRow, { paddingVertical: spacing.md }]}>
+          <Text style={[styles.settingValue, { color: colors.primary, fontWeight: "800" }]}>افتح البوت</Text>
+          <View style={{ flex: 1, alignItems: "flex-end", marginRight: 8 }}>
+            <Text style={[styles.settingLabel, { color: colors.ink }]}>بوت تليجرام (Islamic72_bot)</Text>
+            <Text style={[styles.settingAbout, { color: colors.muted, textAlign: "right" }]}>نسخة مصغرة من التطبيق على تليجرام يمكنك استخدامها في أي وقت.</Text>
+          </View>
+        </Pressable>
+        <Pressable onPress={() => openLink("https://wa.me/201004886479")} style={[styles.settingRow, { paddingVertical: spacing.md }]}>
+          <Text style={[styles.settingValue, { color: colors.primary, fontWeight: "800" }]}>افتح المحادثة</Text>
+          <View style={{ flex: 1, alignItems: "flex-end", marginRight: 8 }}>
+            <Text style={[styles.settingLabel, { color: colors.ink }]}>رقم المطور (201004886479+)</Text>
+            <Text style={[styles.settingAbout, { color: colors.muted, textAlign: "right" }]}>رقم الدعم الفني للمطور (اضغط للمحادثة المباشرة).</Text>
+          </View>
+        </Pressable>
+      </Card>
+
+      <SectionTitle title="التواصل مع المطور" />
+      <Card style={{ gap: spacing.md }}>
+        <Pressable onPress={() => openLink("mailto:contact@new-idea.info")} style={[styles.settingRow, { paddingVertical: spacing.md }]}>
+          <Text style={[styles.settingValue, { color: colors.primary, fontWeight: "800" }]}>إرسال بريد</Text>
+          <View style={{ flex: 1, alignItems: "flex-end", marginRight: 8 }}>
+            <Text style={[styles.settingLabel, { color: colors.ink }]}>الدعم الفني والاقتراحات</Text>
+            <Text style={[styles.settingAbout, { color: colors.muted, textAlign: "right" }]}>تواصل مباشر مع مطور التطبيق للاقتراحات أو البلاغات.</Text>
+          </View>
+        </Pressable>
+      </Card>
+
+      <Card style={{ alignItems: "center", gap: spacing.sm, paddingVertical: spacing.lg }}>
+        <Sparkles color={colors.gold} size={28} />
+        <Text style={[styles.cardBody, { color: colors.muted, textAlign: "center" }]}>لو أفادك التطبيق، دعوة صادقة في ظهر الغيب أفضل من كل تقييم.</Text>
+        <Text style={[styles.settingAbout, { color: colors.border, textAlign: "center" }]}>الإصدار {Constants.expoConfig?.version ?? "1.5.1"}</Text>
+      </Card>
+    </Screen>
+  );
+}
+
+function SettingsGroup({ title, children }: { title: string; children: React.ReactNode }) { return <><SectionTitle title={title} /><Card style={styles.settingsCard}>{children}</Card></>; }
+function SettingToggle({ label, value, onChange }: { label: string; value: boolean; onChange: (value: boolean) => void }) {
+  const { colors } = useNourTheme();
+  return <View style={styles.settingRow}><Switch value={value} onValueChange={onChange} trackColor={{ false: colors.border, true: colors.selectedSurface }} thumbColor={value ? colors.gold : colors.surface} /><Text style={styles.settingLabel}>{label}</Text></View>;
+}
+function SettingRow({ label, value, onPress }: { label: string; value: string; onPress?: () => void }) { return <Pressable disabled={!onPress} onPress={onPress} style={styles.settingRow}><Text style={styles.settingValue}>{value}</Text><Text style={styles.settingLabel}>{label}</Text></Pressable>; }
+function SettingsChoice({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) { const { colors } = useNourTheme(); return <View style={styles.choiceWrap}><Text style={styles.settingLabel}>{label}</Text>{options.map((option) => { const active = value === option; return <Pressable key={option} onPress={() => onChange(option)} style={[styles.choice, { backgroundColor: active ? colors.selectedSurface : colors.surfaceSoft }]}><View style={[styles.radioDot, active && styles.radioDotActive]} /><Text style={[styles.choiceText, active && { color: colors.selectedText, fontWeight: "800" }]}>{option}</Text></Pressable>; })}</View>; }
+
+
+
+function ReminderScreen({ items, initialIndex, onClose }: { items: DhikrItem[]; initialIndex: number; onClose: () => void }) {
+  const [index, setIndex] = useState(initialIndex);
+  const item = items[index];
+  if (!item) return null;
+  return (
+    <LinearGradient colors={["#315B4C", "#1D3A31"]} style={styles.reminderScreen}>
+      <SafeAreaView style={styles.alertSafe} edges={["top", "bottom"]}>
+        <Pressable onPress={onClose} style={styles.reminderClose}><X color={palette.white} size={27} /></Pressable>
+        <Text style={styles.reminderEyebrow}>وضع القراءة · {toArabicNumber(index + 1)} من {toArabicNumber(items.length)}</Text>
+        <Sparkles color="#F4D57C" size={60} />
+        <Text style={styles.reminderText}>{item.text}</Text>
+        <Text style={styles.reminderCount}>يُكرّر {toArabicNumber(item.count)} مرات</Text>
+        <View style={styles.reminderActions}><PrimaryButton label="تخطي" onPress={() => setIndex((value) => Math.min(items.length - 1, value + 1))} secondary /><PrimaryButton label="التالي" onPress={() => setIndex((value) => Math.min(items.length - 1, value + 1))} icon={ChevronLeft} /></View>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+function BottomNav({ route, navigate }: { route: Route; navigate: (route: Route) => void }) {
+  const { colors } = useNourTheme();
+  const entries: Array<{ route: Route; label: string; icon: typeof Home }> = [
+    { route: "home", label: "الرئيسية", icon: Home }, { route: "quran", label: "القرآن", icon: BookOpen }, { route: "adhkar", label: "الأذكار", icon: Sparkles }, { route: "more", label: "المزيد", icon: Landmark }, { route: "settings", label: "الإعدادات", icon: Settings },
+  ];
+  return <View style={[styles.bottomNav, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>{entries.map((entry) => { const Icon = entry.icon; const active = route === entry.route; return <Pressable key={entry.route} onPress={() => navigate(entry.route)} style={styles.navItem}><Icon color={active ? colors.gold : colors.muted} size={24} /><Text style={[styles.navLabel, active && styles.navLabelActive]}>{entry.label}</Text></Pressable>; })}</View>;
+}
+
+function NourAppRoot() {
+  const { colors, darkMode, prayerAlerts } = useNourTheme();
+  const [route, setRoute] = useState<Route>("home");
+  const [error, setError] = useState<{ error: unknown; retry: () => void } | null>(null);
+  const [toast, setToast] = useState("");
+  const [reminder, setReminder] = useState<{ items: DhikrItem[]; index: number } | null>(null);
+  const [homeOpened, setHomeOpened] = useState(false);
+  const hydrated = useNourStore((state) => state.hydrated);
+  const hydrate = useNourStore((state) => state.hydrate);
+  const coordinates = useNourStore((state) => state.coordinates);
+  const locationReady = useNourStore((state) => state.locationReady);
+  const method = useNourStore((state) => state.method);
+  const muteToday = useNourStore((state) => state.muteToday);
+  const reminders = useNourStore((state) => state.reminders);
+  const navigate = (destination: Route) => setRoute(destination);
+  const showError = (item: unknown, retry: () => void) => setError({ error: item, retry });
+  const showToast = (message: string) => { setToast(message); setTimeout(() => setToast(""), 4_500); };
+
+  const scheduleNotifications = useCallback(async () => {
+    if (!hydrated || !locationReady || !homeOpened) return;
+    try {
+      const now = new Date();
+      const currentMonth = await getMonthlyCalendar(now, coordinates, method);
+      const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const nextMonth = now.getDate() > 24
+        ? await getMonthlyCalendar(nextMonthDate, coordinates, method)
+        : [];
+      await rescheduleAllNotifications({
+        days: [...currentMonth, ...nextMonth],
+        muteToday,
+        reminders,
+        prayerAlerts,
+      });
+    } catch (error) {
+      console.warn("[nour:notifications] schedule failed", error);
+    }
+  }, [coordinates, hydrated, homeOpened, locationReady, method, muteToday, prayerAlerts, reminders]);
+
+  // ── FCM: Sync prefs to Supabase backend whenever they change ────────────
+  const syncFCMPrefs = useCallback(async () => {
+    if (!hydrated || !locationReady) return;
+    try {
+      await prepareNotifications();
+      await syncFCMPrefsToSupabase({
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        calcMethod: method,
+        reminders,
+        prayerAlerts,
+        muteToday,
+        khatma: null, // khatma prefs synced separately from khatma screen
+      });
+    } catch (err) {
+      console.warn("[nour:fcm] Failed to sync prefs", err);
+    }
+  }, [coordinates, hydrated, locationReady, method, muteToday, prayerAlerts, reminders]);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    if (!hydrated || !locationReady || !homeOpened) return;
+    // In FCM mode: scheduleNotifications is a no-op; syncFCMPrefs does real work.
+    void scheduleNotifications();
+    void syncFCMPrefs();
+    const unsubscribe = subscribeNotificationReschedule(() => { void syncFCMPrefs(); });
+    // Set up FCM foreground handler
+    const unsubscribeForeground = setupFCMForegroundHandler();
+    return () => {
+      unsubscribe();
+      unsubscribeForeground();
+    };
+  }, [hydrated, homeOpened, locationReady, scheduleNotifications, syncFCMPrefs]);
+
+  useEffect(() => {
+    if (route === "home") setHomeOpened(true);
+  }, [route]);
+
+  useEffect(() => {
+    // Expo Notifications response listener (Action buttons & Banner taps)
+    const subscription = Notifications.addNotificationResponseReceivedListener((response: Notifications.NotificationResponse) => {
+      const actionId = response.actionIdentifier;
+      const data = response.notification.request.content.data as Record<string, unknown> | undefined;
+      const reminderId = String(data?.reminder ?? "");
+      const kind = data?.kind;
+
+      if (kind === "nour-adhan") {
+        // الأذان إشعار عادي — الضغط عليه يفتح الشاشة الرئيسية فقط.
+        setRoute("home");
+      } else if (actionId === "read_morning" || reminderId.startsWith("morning")) {
+        setRoute("adhkar");
+      } else if (actionId === "read_evening" || reminderId.startsWith("evening")) {
+        setRoute("adhkar");
+      } else if (actionId === "read_kahf" || reminderId.startsWith("kahf")) {
+        setRoute("quran");
+      } else if (actionId === "open_quran" || reminderId.startsWith("quran")) {
+        setRoute("quran");
+      } else if (actionId === "open_hadith" || reminderId.startsWith("hadith")) {
+        setRoute("library");
+      } else if (actionId === "open_fasting" || reminderId.startsWith("monday-fast") || reminderId.startsWith("thursday-fast")) {
+        setRoute("tracker");
+      } else if (actionId === "open_witr" || reminderId.startsWith("witr")) {
+        setRoute("tracker");
+      } else if (actionId === "open_salawat" || reminderId.startsWith("salawat")) {
+        setRoute("adhkar");
+      } else if (actionId === "open_khatma" || data?.scope === "khatma") {
+        setRoute("khatma");
+      }
+
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const back = () => setRoute("home");
+  const content = useMemo(() => {
+    if (route === "reminder" && reminder) return <ReminderScreen items={reminder.items} initialIndex={reminder.index} onClose={back} />;
+    const shared = { showError };
+    if (route === "quran") return <QuranScreen onBack={back} {...shared} />;
+    if (route === "adhkar") return <AdhkarScreen onBack={back} {...shared} openReminder={(items, index) => { setReminder({ items, index }); setRoute("reminder"); }} />;
+    if (route === "radio") return <RadioScreen onBack={back} {...shared} />;
+    if (route === "library") return <LibraryScreen onBack={back} {...shared} navigate={navigate} />;
+    if (route === "books") return <BookLibraryScreen onBack={back} {...shared} showToast={showToast} />;
+    if (route === "hadith-books") return <HadithBooksScreen onBack={back} {...shared} />;
+    if (route === "qibla") return <QiblaScreen onBack={back} {...shared} />;
+    if (route === "account") return <AccountScreen onBack={back} {...shared} showToast={showToast} />;
+    if (route === "tools") return <ToolsScreen onBack={back} {...shared} />;
+    if (route === "tracker") return <TrackerScreen onBack={back} {...shared} />;
+    if (route === "khatma") return <KhatmaScreen onBack={back} navigate={navigate} {...shared} />;
+    if (route === "names") return <NamesScreen onBack={back} {...shared} />;
+    if (route === "settings") return <SettingsScreen onBack={back} {...shared} showToast={showToast} navigate={navigate} />;
+    if (route === "about") return <AboutScreen onBack={back} />;
+    if (route === "more") return <MoreScreen showError={showError} showToast={showToast} />;
+    return <HomeScreen navigate={navigate} {...shared} showToast={showToast} />;
+  }, [route, reminder, error]);
+  const [showBatteryPrompt, setShowBatteryPrompt] = useState(false);
+  const [showOverlayPrompt, setShowOverlayPrompt] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      void isBatteryOptimizationActive().then((active) => {
+        if (active) setShowBatteryPrompt(true);
+      });
+      void AsyncStorage.getItem("nour:overlay_prompted").then((prompted) => {
+        if (!prompted) {
+          setShowOverlayPrompt(true);
+          void AsyncStorage.setItem("nour:overlay_prompted", "true");
+        }
+      });
+    }
+  }, []);
+
+  const isOverlay = route === "adhan" || route === "reminder";
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={[styles.app, { backgroundColor: colors.background }]} edges={["top"]}>
+        <StatusBar style={isOverlay || darkMode ? "light" : "dark"} />
+        <Animated.View key={route} entering={FadeInDown.duration(220)} style={[styles.app, { backgroundColor: colors.background }]}>{content}</Animated.View>
+        {!isOverlay ? <BottomNav route={route} navigate={navigate} /> : null}
+        {toast ? <Animated.View entering={FadeIn} style={[styles.toast, { backgroundColor: colors.primary }]}><Text style={styles.toastText}>{toast}</Text></Animated.View> : null}
+        {error ? <ErrorDialog error={error.error} onRetry={() => { setError(null); void error.retry(); }} onClose={() => setError(null)} /> : null}
+        <NotificationSetupModal visible={showBatteryPrompt} onClose={() => setShowBatteryPrompt(false)} />
+        <FullScreenPermissionModal visible={showOverlayPrompt} onClose={() => setShowOverlayPrompt(false)} />
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}
+
+function AuthenticatedApp() {
+  const { mode, showWelcome } = useNourAuth();
+  const [splashFinished, setSplashFinished] = useState(false);
+
+  if (!splashFinished) {
+    return <SplashAnimation isAppReady={mode !== "loading"} onFinish={() => setSplashFinished(true)} />;
+  }
+
+  if (mode === "signed-out" || showWelcome) return <AuthGate />;
+  return (
+    <>
+      <NourAppRoot />
+      <FloatingAudioPlayer />
+    </>
+  );
+}
+
+
+
+
+function AnimatedSplash({ onAnimationComplete, children }: { onAnimationComplete: () => void, children: React.ReactNode }) {
+  const [appReady, setAppReady] = useState(false);
+  const splashOpacity = useSharedValue(1);
+  const logoScale = useSharedValue(0.8);
+  const logoOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    // Wait for initial things, then start animation
+    setTimeout(() => {
+      setAppReady(true);
+      SplashScreen.hideAsync().catch(() => {});
+      
+      logoOpacity.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
+      logoScale.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) }, () => {
+        // Hold for a moment, then fade out the whole splash
+        setTimeout(() => {
+          splashOpacity.value = withTiming(0, { duration: 600, easing: Easing.inOut(Easing.cubic) }, () => {
+            runOnJS(onAnimationComplete)();
+          });
+        }, 800);
+      });
+    }, 500);
+  }, []);
+
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: splashOpacity.value,
+  }));
+
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }]
+  }));
+
+  return (
+    <View style={{ flex: 1 }}>
+      {children}
+      {appReady && (
+        <Animated.View pointerEvents="none" style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: palette.cream, justifyContent: 'center', alignItems: 'center', zIndex: 9999 }, containerStyle]}>
+          <Animated.Image source={require("../assets/nour-logo.jpg")} style={[{ width: 180, height: 180, resizeMode: "contain", borderRadius: 40 }, logoStyle]} />
+        </Animated.View>
+      )}
+    </View>
+  );
+}

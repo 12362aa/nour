@@ -1,0 +1,47 @@
+function NamesScreen({ onBack, showError }: { onBack: () => void; showError: (error: unknown, retry: () => void) => void }) {
+  const { width } = useWindowDimensions();
+  const { colors } = useNourTheme();
+  const { resource, reload } = useResource(getAllahNames, []);
+  const [selected, setSelected] = useState<AllahName | null>(null);
+  const itemWidth = Math.max(145, (width - 48) / 2);
+
+  if (selected) return <NameDetail item={selected} all={resource.data ?? []} onSelect={setSelected} onBack={() => setSelected(null)} />;
+  return (
+    <Screen>
+      
+
+      <Header title="أسماء الله الحسنى" subtitle="٩٩ اسماً مع المعنى الفصيح والتأمل" onBack={onBack} />
+      {resource.phase === "loading" ? <LoadingState lines={6} /> : null}
+      {resource.phase === "error" ? <ErrorState error={resource.error} onRetry={reload} onDetails={() => showError(resource.error, reload)} /> : null}
+      {resource.data?.length ? (
+        <FlatList
+          scrollEnabled={false}
+          contentContainerStyle={styles.nameGrid}
+          data={resource.data}
+          keyExtractor={(item) => String(item.number)}
+          numColumns={2}
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInDown.delay(index * 20).springify()} style={{ flex: 1 }}>
+              <Pressable
+                onPress={() => setSelected(item)}
+                style={({ pressed }) => [
+                  styles.nameCard,
+                  { width: itemWidth, backgroundColor: colors.surface, borderColor: colors.border, overflow: "hidden" },
+                  pressed && { transform: [{ scale: 0.96 }], opacity: 0.9 },
+                ]}
+              >
+                <ImageBackground source={{ uri: item.imageUrl }} style={{ width: "100%", height: 75, justifyContent: "center", alignItems: "center" }} imageStyle={{ opacity: 0.18 }}>
+                  <NativeText style={{ fontSize: 24, fontWeight: "900", color: colors.gold }}>{item.name}</NativeText>
+                </ImageBackground>
+                <View style={{ padding: 10, gap: 4 }}>
+                  <NativeText numberOfLines={2} style={[styles.nameMeaning, { color: colors.primary, textAlign: "center", fontSize: 13, fontWeight: "700" }]}>{item.meaning}</NativeText>
+                  <NativeText numberOfLines={3} style={[styles.nameMeaning, { color: colors.ink, textAlign: "center", fontSize: 11, marginTop: 4, lineHeight: 18 }]}>{item.benefit}</NativeText>
+                </View>
+              </Pressable>
+            </Animated.View>
+          )}
+        />
+      ) : null}
+    </Screen>
+  );
+}
