@@ -29,7 +29,6 @@ type ReminderDef = {
   minute: number;
   field: string;
   dayFilter?: number; // 0=Sun,5=Fri
-  prevDayFilter?: number; // reminder sent day before (for fasting)
   channel: string;
   sound: string;
   categoryId: string;
@@ -43,8 +42,8 @@ const REMINDERS: ReminderDef[] = [
   { id: "witr",          title: "لا تنس الوتر",                         body: "اختم يومك بركعة الوتر.",                    hour: 22, minute: 15, field: "reminder_witr",           channel: "nour-reminders-v6",    sound: "default", categoryId: "nour-category-witr" },
   { id: "kahf",          title: "جمعة مباركة - سورة الكهف",            body: "اقرأ سورة الكهف وانر ما بين الجمعتين.",   hour: 8,  minute: 0,  field: "reminder_friday_kahf",    channel: "nour-reminders-v6",    sound: "default", dayFilter: 5, categoryId: "nour-category-friday-kahf" },
   { id: "salawat",       title: "اكثروا من الصلاة على النبي",           body: "من افضل اعمال يوم الجمعة.",                hour: 14, minute: 0,  field: "reminder_friday_salawat", channel: "nour-reminders-v6",    sound: "default", dayFilter: 5, categoryId: "nour-category-salawat" },
-  { id: "monday-fast",   title: "تذكير صيام الاثنين",                   body: "هل تنوي صيام غد؟",                          hour: 20, minute: 0,  field: "reminder_fast_days",      channel: "nour-reminders-v6",    sound: "default", prevDayFilter: 0, categoryId: "nour-category-fasting" },
-  { id: "thursday-fast", title: "تذكير صيام الخميس",                    body: "هل تنوي صيام غد؟",                          hour: 20, minute: 0,  field: "reminder_fast_days",      channel: "nour-reminders-v6",    sound: "default", prevDayFilter: 4, categoryId: "nour-category-fasting" },
+  { id: "monday-fast",   title: "تذكير صيام الاثنين",                   body: "هل تنوي صيام غد؟",                          hour: 20, minute: 0,  field: "reminder_fast_days",      channel: "nour-reminders-v6",    sound: "default", dayFilter: 0, categoryId: "nour-category-fasting" },
+  { id: "thursday-fast", title: "تذكير صيام الخميس",                    body: "هل تنوي صيام غد؟",                          hour: 20, minute: 0,  field: "reminder_fast_days",      channel: "nour-reminders-v6",    sound: "default", dayFilter: 3, categoryId: "nour-category-fasting" },
 ];
 
 // ── FCM token (Google OAuth2) ────────────────────────────────────────────────
@@ -290,12 +289,6 @@ async function handler(req: Request) {
     for (const rem of REMINDERS) {
       if (!prefs[rem.field]) continue;
       if (rem.dayFilter !== undefined && userDay !== rem.dayFilter) continue;
-      if (rem.prevDayFilter !== undefined) {
-        // Send at 20:00 the evening before the fast day
-        const tomorrowDay = (userDay + 1) % 7;
-        if (tomorrowDay !== rem.prevDayFilter) continue;
-      }
-      if (isTest) {
           console.log("[fcm] Executing test mode");
           const notifKey = "test::" + Date.now();
           const sent = await sendFCM(prefs.fcm_token, "إشعار تجريبي 🧪", "هذا الإشعار لتأكيد عمل نظام Firebase بنجاح!", "nour-reminders-v5", "default", { type: "test", notifKey });
