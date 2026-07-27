@@ -63,7 +63,7 @@ export async function prepareNotifications(): Promise<void> {
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     showBadge: true,
     enableLights: true,
-  });
+  }).catch(() => null);
 
   // Silent channel for muted prayers
   await Notifications.setNotificationChannelAsync(SILENT_CHANNEL, {
@@ -73,7 +73,7 @@ export async function prepareNotifications(): Promise<void> {
     sound: undefined,
     vibrationPattern: [0, 120],
     lightColor: "#D7AA4F",
-  });
+  }).catch(() => null);
 
   // Azkar morning
   await Notifications.setNotificationChannelAsync(AZKAR_MORNING_CHANNEL, {
@@ -85,7 +85,7 @@ export async function prepareNotifications(): Promise<void> {
     lightColor: "#D7AA4F",
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     showBadge: true,
-  });
+  }).catch(() => null);
 
   // Azkar evening
   await Notifications.setNotificationChannelAsync(AZKAR_EVENING_CHANNEL, {
@@ -97,7 +97,7 @@ export async function prepareNotifications(): Promise<void> {
     lightColor: "#D7AA4F",
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     showBadge: true,
-  });
+  }).catch(() => null);
 
   // General reminders (system default sound)
   await Notifications.setNotificationChannelAsync(GENERAL_CHANNEL, {
@@ -109,7 +109,7 @@ export async function prepareNotifications(): Promise<void> {
     lightColor: "#D7AA4F",
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     showBadge: true,
-  });
+  }).catch(() => null);
 
   // Khatma channel
   await Notifications.setNotificationChannelAsync(KHATMA_CHANNEL, {
@@ -121,7 +121,7 @@ export async function prepareNotifications(): Promise<void> {
     lightColor: "#10B981",
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     showBadge: true,
-  });
+  }).catch(() => null);
 
   // Prayer action buttons
   await Notifications.setNotificationCategoryAsync(PRAYER_CATEGORY, [
